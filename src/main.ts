@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { v2 as webdav } from 'webdav-server';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
+import { Next } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,7 +32,9 @@ async function bootstrap() {
     return HTTPNoAuthentication;
   })();
 
-  function setHeaders(arg) {
+  const MS_WEBDAV = RegExp('^Microsoft');
+
+  function setHeaders(arg, next) {
     if (arg.request.method === 'OPTIONS') {
       arg.response.setHeader(
         'Access-Control-Allow-Methods',
@@ -47,6 +50,11 @@ async function bootstrap() {
     }
 
     arg.response.setHeader('MS-Author-Via', 'DAV');
+    const userAgent = arg.request.headers['user-agent'];
+    if (userAgent && MS_WEBDAV.test(userAgent)) {
+      arg.response.removeHeader('dav');
+    }
+    next();
   }
 
   const userManager = new webdav.SimpleUserManager();
@@ -57,7 +65,7 @@ async function bootstrap() {
   });
 
   server.beforeRequest((arg, next) => {
-    setHeaders(arg);
+    setHeaders(arg, next);
     next();
   });
 
