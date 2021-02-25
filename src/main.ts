@@ -26,6 +26,28 @@ async function bootstrap() {
       treeFilePath: 'data.json',
     },
   });
+
+  function setHeaders(arg) {
+    if (arg.request.method === 'OPTIONS') {
+      arg.response.setHeader(
+        'Access-Control-Allow-Methods',
+        'PROPPATCH,PROPFIND,OPTIONS,DELETE,UNLOCK,COPY,LOCK,MKCOL,MOVE,HEAD,POST,PUT,GET',
+      );
+      arg.response.setHeader(
+        'allow',
+        'PROPPATCH,PROPFIND,OPTIONS,DELETE,UNLOCK,COPY,LOCK,MKCOL,MOVE,HEAD,POST,PUT,GET',
+      );
+      arg.response.setHeader('Access-Control-Allow-Headers', '*');
+      arg.response.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    arg.response.setHeader('MS-Author-Via', 'DAV');
+  }
+
+  server.beforeRequest((arg, next) => {
+    setHeaders;
+    next();
+  });
+
   // Try to load the 'data.json' file
   server.autoLoad((e) => {
     if (e) {
@@ -42,7 +64,7 @@ async function bootstrap() {
           'file0.txt': webdav.ResourceType.File, // /file0.txt
         },
         () => {
-          console.log('rrr');
+          console.log('add Sub Tree http://3.121.217.27:1901/');
         },
       );
     }
