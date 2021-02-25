@@ -34,7 +34,7 @@ async function bootstrap() {
 
   const MS_WEBDAV = RegExp('^Microsoft');
 
-  function setHeaders(arg, next) {
+  function setHeaders(arg) {
     if (arg.request.method === 'OPTIONS') {
       arg.response.setHeader(
         'Access-Control-Allow-Methods',
@@ -54,7 +54,6 @@ async function bootstrap() {
     if (userAgent && MS_WEBDAV.test(userAgent)) {
       arg.response.removeHeader('dav');
     }
-    next();
   }
 
   const userManager = new webdav.SimpleUserManager();
@@ -65,7 +64,7 @@ async function bootstrap() {
   });
 
   server.beforeRequest((arg, next) => {
-    setHeaders(arg, next);
+    setHeaders(arg);
     next();
   });
 
