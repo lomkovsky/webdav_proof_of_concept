@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { v2 as webdav } from 'webdav-server';
 import { AppModule } from './app.module';
+import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -139,13 +140,17 @@ async function bootstrap() {
     next();
   });
 
+  const dir = __dirname + '/public';
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
   server.setFileSystem(
     '/folder',
-    new webdav.PhysicalFileSystem(
-      '/home/ubuntu/webdav_proof_of_concept/folder',
-    ),
+    new webdav.PhysicalFileSystem(__dirname + '/public'),
+    // '/home/dima/Documents/IvorySoft/fun/webdav-powerpoint/folder'),
     (success) => {
-      server.start(() => console.log('READY'));
+      server.start(() => console.log('READY', 'path ', __dirname + '/public'));
     },
   );
 
